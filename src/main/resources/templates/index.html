@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios</title>
+</head>
+<body>
+    <h1>Registro de Usuarios</h1>
+    
+    <form id="usuarioForm">
+        <input type="text" id="nombre" placeholder="Nombre" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <button type="submit">Crear Usuario</button>
+    </form>
+
+    <div id="usuariosList"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api/usuarios';
+
+        // Cargar usuarios
+        async function cargarUsuarios() {
+            const response = await fetch(API_URL);
+            const usuarios = await response.json();
+            const usuariosList = document.getElementById('usuariosList');
+            usuariosList.innerHTML = usuarios.map(usuario => `
+                <div>
+                    ${usuario.nombre} - ${usuario.email}
+                    <button onclick="eliminarUsuario('${usuario.id}')">Eliminar</button>
+                </div>
+            `).join('');
+        }
+
+        // Crear usuario
+        document.getElementById('usuarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre, email })
+            });
+
+            cargarUsuarios();
+        });
+
+        // Eliminar usuario
+        async function eliminarUsuario(id) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            cargarUsuarios();
+        }
+
+        cargarUsuarios();
+    </script>
+</body>
+</html>
